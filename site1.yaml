@@ -1,0 +1,233 @@
+---
+- hosts: all 
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: updating all hosts 
+      apt:
+        update_cache: yes
+        
+- hosts: webservers
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Copy Flask app to remote server
+      copy:
+        src: ./application2.py
+        dest: /home/ubuntu/application2.py
+        mode: '0755'
+
+    - name: Install Python 3 and pip
+      become: true
+      apt:
+        name:
+          - python3
+          - python3-pip
+        update_cache: yes
+
+    - name: Install Flask
+      become: true
+      pip:
+        name: Flask
+
+    - name: Create systemd unit file for application2
+      copy:
+        src: ./application2.service
+        dest: /etc/systemd/system/application2.service
+        mode: '0777'
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start application2 service
+      systemd:
+        name: application2.service
+        state: started
+        enabled: yes
+
+    - name: Install SNMP daemon on Service Nodes
+      become: true
+      apt:
+        name: snmpd
+        state: present
+
+    - name: Install snmp-mibs-downloader
+      become: true
+      apt:
+        name: snmp-mibs-downloader
+        state: present
+
+    - name: copy snmpd.conf file
+      copy:
+        src="./snmpd.conf"
+        dest="/etc/snmp/snmpd.conf"
+
+    - name: restarting snmpd
+      service:
+        name: snmpd
+        state: restarted
+        enabled: yes
+
+
+- hosts: HAproxy
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install SNMP daemon on Service Nodes
+      become: true
+      apt:
+        name: snmpd
+        state: present
+
+    - name: Install snmp-mibs-downloader
+      become: true
+      apt:
+        name: snmp-mibs-downloader
+        state: present
+        
+    - name: Install snmp package
+      become: true
+      apt:
+        name: snmp
+        state: present
+        
+    - name: Install SNMP tools
+      become: true
+      apt:
+        name: snmp
+        state: present
+
+    - name: copy snmpd.conf file
+      copy:
+        src="./snmpd.conf"
+        dest="/etc/snmp/snmpd.conf"
+
+    - name: restarting snmpd
+      service:
+        name: snmpd
+        state: restarted
+        enabled: yes
+
+    - name: Install HAProxy
+      apt:
+        name: haproxy
+        state: latest
+  
+    - name: Install keepalived on PROXY Nodes
+      become: true
+      apt:
+        name: keepalived
+        state: present
+
+    - name: Configure HAProxy
+      template:
+        src: ./haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+ 
+    - name: Restart haproxy service
+      service:
+        name: haproxy
+        state: restarted
+
+    - name: Restart Keepalived service
+      service:
+        name: keepalived
+        state: restarted
+
+- hosts: primary_proxy
+  become: yes
+  vars:
+    host_name: "{{ inventory_hostname }}"
+    node_state: MASTER
+    node_priority: 101
+    virtual_ip: "{{ lookup('file', './vipaddr') }}"
+  tasks:
+    - name: configure keepalived
+      template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+
+- hosts: backup_proxy
+  become: yes
+  vars:
+    host_name: "{{ inventory_hostname }}"
+    node_state: BACKUP
+    node_priority: 100
+    virtual_ip: "{{ lookup('file', './vipaddr') }}"
+  tasks:
+    - name: configure keepalived
+      template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+
+- name: Restart Keepalived
+  hosts: HAproxy
+  become: yes
+  tasks:
+    - name: Ensure Keepalived service is running
+      systemd:
+        name: keepalived
+        enabled: yes
+
+    - name: restart keepalived
+      service:
+        name: keepalived
+        state: restarted
+        
+    - name: start keepalived
+      service:
+        name: keepalived
+        state: started
+
+- name: Install Prometheus and Grafana on Bastion
+  hosts: Bastion
+  gather_facts: yes
+  become: true
+  tasks:
+    - name : sudo wait
+      become: yes
+      shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
+ 
+    - name: gather server ip addresses
+      setup:
+          filter: ansible_default_ipv4.address     
+
+    - name: copy prometheus.yml
+      template:
+        src: "prometheus.yml.j2"
+        dest: "/etc/prometheus/prometheus.yml"
+
+    - name: Restart prometheus
+      systemd:
+        name: prometheus
+        state: restarted 
+    
+- name: Install Node exporter on nodes
+  hosts: webservers
+  gather_facts: yes
+  become: true
+  tasks:
+  
+    - name: gather server ip addresses
+      setup:
+            filter: ansible_default_ipv4.address
+
+    - name : sudo wait
+      become: yes
+      shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
+
+    - name: Initializing Requirements
+      copy:
+        src: "nodeconfigure.sh"
+        dest: "nodeconfigure.sh"
+        mode: '0755'
+    
+    - name: Install and Configure Requirements
+      command: bash nodeconfigure.sh
