@@ -35,41 +35,61 @@ def cleanup(openrc_file, ssh_key):
     print(f"{get_formatted_time()}: Nodes are gone ") 
     # Delete servers
     for server_name in server_names:
-        run_command(f"openstack server delete {server_name}")
-        print(f"{get_formatted_time()}: deleting {server_name} .. ")
+        execution1 = subprocess.run(f"openstack server delete {server_name}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if execution1.returncode == 0:
+            print(f"{get_formatted_time()}: deleting {server_name} ..")
+        else:
+            print(f"{get_formatted_time()}: {server_name} does not exists! or already deleted.. ")
     # Delete port
     port_name = "{tag}_viprt"  
-    run_command(f"openstack port delete {tag}_viprt")
-    print(f"{get_formatted_time()}: deleting {tag}_viprt.. ")
+    execution2 = subprocess.run(f"openstack port delete {tag}_viprt", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if execution2.returncode == 0:
+            print(f"{get_formatted_time()}: deleting {tag}_viprt.. ")
+        else:
+            print(f"{get_formatted_time()}: {tag}_viprt does not exists! or already deleted.. ")
    
     # List subnets and extract subnet IDs
     subnet_list_output = subprocess.check_output("openstack subnet list", shell=True)
-    subnet_ids = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", subnet_list_output.decode())
-
+    subnet = subprocess.run(subnet_list_output, shell=True, capture_output=True, text=True).stdout
+    
     # Remove subnets from router and delete them
-    router_name = f"{tag}_network-router"  # Replace with your router name
-    for subnet_id in subnet_ids:
+    router_name = f"{tag}_network-router"  
+    subnet_id = f"{tag}_network-subnet"
+    if subnet_id in subnet:
         run_command(f"openstack router remove subnet {router_name} {subnet_id}")
         run_command(f"openstack subnet delete {subnet_id}")
-    print(f"{get_formatted_time()}: deleting subnet.. ")
+        print(f"{get_formatted_time()}: deleting subnet.. ")
+    else: 
+        print(f"{get_formatted_time()}: {tag}_network-subnet does not exists! or already deleted.. ")
     # Delete network
-    network_name = "{tag}_network"  
-    run_command(f"openstack network delete {tag}_network")
-    print(f"{get_formatted_time()}: deleting network.. ")
+    execution3 = subprocess.run(f"openstack network delete {tag}_network", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if execution3.returncode == 0:
+        print(f"{get_formatted_time()}: deleting network.. ")
+    else:
+            print(f"{get_formatted_time()}: {tag}_network does not exists! or already deleted.. ")
     
     # Delete router
-    run_command(f"openstack router delete {router_name}")
-    print(f"{get_formatted_time()}: deleting router.. ")
+    execution4 = subprocess.run(f"openstack router delete {tag}_network-router", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if execution4.returncode == 0:
+        print(f"{get_formatted_time()}: deleting {tag}_network-router.. ")
+    else:
+            print(f"{get_formatted_time()}: {tag}_network-router does not exists! or already deleted.. ")
     
     # Delete keypair
     keypair_name = f"{tag}_key"  
-    run_command(f"openstack keypair delete {keypair_name}")
-    print(f"{get_formatted_time()}: deleting keypair.. ")
+    execution5 = subprocess.run(f"openstack keypair delete {keypair_name}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if execution5.returncode == 0:
+        print(f"{get_formatted_time()}: deleting {keypair_name}.. ")
+    else:
+            print(f"{get_formatted_time()}: {keypair_name} does not exists! or already deleted.. ")
     
-    # Delete keypair
-    securitygroup_name = f"{tag}_security-group"  
-    run_command(f"openstack security group delete {tag}_security-group")
-    print(f"{get_formatted_time()}: deleting security group.. ")
+    # Delete securitygroup
+    securitygroup_name = f"{tag}_security-group"
+    execution6 = subprocess.run(f"openstack security group delete {tag}_security-group", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if execution6.returncode == 0:
+        print(f"{get_formatted_time()}: deleting {securitygroup_name}.. ")
+    else:
+            print(f"{get_formatted_time()}: {securitygroup_name} does not exists! or already deleted.. ")
     
     # List floating IPs and extract floating IP IDs
 #    floating_ip_list_output = subprocess.check_output("openstack floating ip list", shell=True)
@@ -87,8 +107,6 @@ def cleanup(openrc_file, ssh_key):
     # Delete volumes
     for volume_id in volume_ids:
         run_command(f"openstack volume delete {volume_id}")
-    
-    print(f"{get_formatted_time()}: deleting volumes.. ")
      
     print(f"{get_formatted_time()}: Checking for {tag} in project..")
     
