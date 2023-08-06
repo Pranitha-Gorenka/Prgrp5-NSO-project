@@ -237,7 +237,7 @@ with open('proxyip', 'w') as file:
 
 
 #Checking and Creating Virtual Port
-port_list = "openstack port show {tag}_viprt"
+port_list = "openstack port list"
 port_name = subprocess.run(port_list, shell=True, capture_output=True, text=True).stdout
 
 print(f"{get_formatted_time()}: checking for {tag}_viprt in the OpenStack project..")
@@ -322,6 +322,15 @@ assign_floating_ip_bastion = f"openstack server add floating ip {tag}_bastion {f
 subprocess.run(assign_floating_ip_bastion, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
  
 print(f"{get_formatted_time()}: Assigned floating IP to bastion")
+
+# Extract fixed IPs of the proxy servers
+command_show_server1 = f"openstack server show {tag}_proxy1 -c addresses"
+output_server1 = subprocess.check_output(command_show_server1, shell=True).decode().strip().split('\n')
+HAPfixedip = output_server1[3].split('=')[1].strip().rstrip('|')
+
+command_show_server2 = f"openstack server show {tag}_proxy2 -c addresses"
+output_server2 = subprocess.check_output(command_show_server2, shell=True).decode().strip().split('\n')
+HAPfixedip2 = output_server2[3].split('=')[1].strip().rstrip('|')
 
 print(f"{get_formatted_time()}: all nodes are done..")
 
