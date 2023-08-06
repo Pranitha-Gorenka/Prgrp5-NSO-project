@@ -44,9 +44,9 @@ def cleanup(openrc_file, ssh_key):
     port_name = "{tag}_viprt"  
     execution2 = subprocess.run(f"openstack port delete {tag}_viprt", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if execution2.returncode == 0:
-            print(f"{get_formatted_time()}: deleting {tag}_viprt.. ")
-        else:
-            print(f"{get_formatted_time()}: {tag}_viprt does not exists! or already deleted.. ")
+        print(f"{get_formatted_time()}: deleting {tag}_viprt.. ")
+    else:
+        print(f"{get_formatted_time()}: {tag}_viprt does not exists! or already deleted.. ")
    
     # List subnets and extract subnet IDs
     subnet_list_output = subprocess.check_output("openstack subnet list", shell=True)
