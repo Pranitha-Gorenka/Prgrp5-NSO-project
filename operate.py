@@ -14,7 +14,12 @@ def get_formatted_time():
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_time
-            
+
+# Function to check if a server is running
+def is_server_running(server_name):
+    result = subprocess.run(f"openstack server show {server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return "ACTIVE" in result.stdout
+
 # Extract command-line arguments
 openrc_file = sys.argv[1]
 tag = sys.argv[2]
@@ -66,6 +71,32 @@ while True:
     existing_nodes = re.findall(rf"^{tag}_node\d+", result.stdout, re.MULTILINE)
     print(f"{get_formatted_time()}: Checking solution, we have: {len(existing_nodes)} nodes.Sleeping..")
     time.sleep(30)
+    
+    print(f"{get_formatted_time()}: Checking if servers are running...")
+
+    # Check if all servers are running
+    all_servers_running = all(is_server_running(server) for server in existing_nodes)
+
+    if all_servers_running:
+        print(f"{get_formatted_time()}: All servers are running.")
+    else:
+        non_running_servers = [server for server in existing_nodes if not is_server_running(server)]
+        print(f"{get_formatted_time()}: The following servers are not running: {', '.join(non_running_servers)}")
+
+        # Attempt to start non-running servers
+        for server in non_running_servers:
+            print(f"{get_formatted_time()}: Attempting to start server {server}...")
+            start_command = f"openstack server start {server}"
+            start_result = subprocess.run(start_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            
+            if start_result.returncode == 0:
+                print(f"{get_formatted_time()}: Server {server} started successfully.")
+            else:
+                print(f"{get_formatted_time()}: Failed to start server {server}. Error: {start_result.stderr}")
+
+        print(f"{get_formatted_time()}: Waiting for 30 seconds...")
+        time.sleep(30)
+        
     if len(existing_nodes) == num_nodes:
         # Update the number of nodes in server.conf
         config_lines = [line.replace(f"num_nodes = {num_nodes}", f"num_nodes = {num_nodes + 1}") for line in config_lines]
