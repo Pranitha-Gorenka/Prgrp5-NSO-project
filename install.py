@@ -10,12 +10,18 @@ import datetime
 import requests
 import ast
 import json
+import time
 
 # Function to get the current formatted time
 def get_formatted_time():
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_time
+    
+# Function to check if a server is running
+def is_server_running(server_name):
+    result = subprocess.run(f"openstack server show {server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return "ACTIVE" in result.stdout
 
 # Extract command-line arguments
 openrc_file = sys.argv[1]
@@ -179,7 +185,32 @@ for server_name in server_names:
         else:
             print(f"{get_formatted_time()}: {server_name} not created...")
             exit(1)
+print(f"{get_formatted_time()}: Checking if servers are running...")
+
+# Check if all servers are running
+all_servers_running = all(is_server_running(server) for server in existing_nodes)
+
+if all_servers_running:
+    print(f"{get_formatted_time()}: All servers are running.")
+else:
+    print(f"{get_formatted_time()}: Not all servers are running. Waiting for 30 seconds...")
+    non_running_servers = [server for server in server_names if not is_server_running(server)]
+    print(f"{get_formatted_time()}: The following servers are not running: {', '.join(non_running_servers)}")
+
+    # Attempt to start non-running servers
+    for server in non_running_servers:
+        print(f"{get_formatted_time()}: Attempting to start server {server}...")
+        start_command = f"openstack server start {server}"
+        start_result = subprocess.run(start_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             
+        if start_result.returncode == 0:
+            print(f"{get_formatted_time()}: Server {server} started successfully.")
+        else:
+            print(f"{get_formatted_time()}: Failed to start server {server}. Error: {start_result.stderr}")
+
+    print(f"{get_formatted_time()}: Waiting for 30 seconds...")
+    time.sleep(30)
+
 # Fetch the IP addresses of the created servers
 node_ips = []
 for server_name in server_names:
