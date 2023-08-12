@@ -120,7 +120,7 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining subnets
     remaining_subnets_output = subprocess.check_output("openstack subnet list", shell=True)
     remaining_subnets = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_subnets_output.decode())
-    if any(f"{tag}_network-subnet" in subnet for subnet in remaining_subnets):
+    if f"{tag}_network-subnet" in remaining_subnets:
         print(f"{get_formatted_time()}: Some subnets with {tag}_ prefix still remain")
     else:
         print(f"{get_formatted_time()}: All subnets with {tag}_ prefix deleted successfully")
@@ -128,7 +128,7 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining networks
     remaining_networks_output = subprocess.check_output("openstack network list", shell=True)
     remaining_networks = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_networks_output.decode())
-    if any(f"{tag}_network" in network for network in remaining_networks):
+    if f"{tag}_network" in remaining_networks:
         print(f"{get_formatted_time()}: Some networks with {tag}_ prefix still remain")
     else:
         print(f"{get_formatted_time()}: All networks with {tag}_ prefix deleted successfully")
@@ -136,7 +136,7 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining routers
     remaining_routers_output = subprocess.check_output("openstack router list", shell=True)
     remaining_routers = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_routers_output.decode())
-    if any(f"{tag}_network-router" in router for router in remaining_routers):
+    if f"{tag}_network-router" in  remaining_routers:
         print(f"{get_formatted_time()}: Some routers with {tag}_ prefix still remain")
     else:
         print(f"{get_formatted_time()}: All routers with {tag}_ prefix deleted successfully")
@@ -144,7 +144,7 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining keypairs
     remaining_keypairs_output = subprocess.check_output("openstack keypair list", shell=True)
     remaining_keypairs = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_keypairs_output.decode())
-    if any(f"{tag}_key" in keypair for keypair in remaining_keypairs):
+    if f"{tag}_key" in  remaining_keypairs:
         print(f"{get_formatted_time()}: Some keypairs with {tag}_ prefix still remain")
     else:
         print(f"{get_formatted_time()}: All keypairs with {tag}_ prefix deleted successfully")
@@ -152,7 +152,7 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining security groups
     remaining_security_groups_output = subprocess.check_output("openstack security group list", shell=True)
     remaining_security_groups = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_security_groups_output.decode())
-    if any(f"{tag}_security-group" in security_group for security_group in remaining_security_groups):
+    if f"{tag}_security-group" in remaining_security_groups:
         print(f"{get_formatted_time()}: Some security groups with {tag}_ prefix still remain")
     else:
         print(f"{get_formatted_time()}: All security groups with {tag}_ prefix deleted successfully")
