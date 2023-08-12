@@ -142,6 +142,33 @@ while True:
  
             print(f"{get_formatted_time()}: Waiting for 30 seconds...")
             time.sleep(30)
+
+        # Check if bastion and proxy servers are active, and start them if not
+        bastion_server_name = f"{tag}_bastion"
+        proxy1_server_name = f"{tag}_proxy1"
+        proxy2_server_name = f"{tag}_proxy2"
+
+        if not is_server_running(bastion_server_name):
+            start_result = subprocess.run(f"openstack server start {bastion_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if start_result.returncode == 0:
+                print(f"{get_formatted_time()}: Bastion server {bastion_server_name} started successfully.")
+            else:
+                print(f"{get_formatted_time()}: Failed to start bastion server {bastion_server_name}. Error: {start_result.stderr}")
+
+        if not is_server_running(proxy1_server_name):
+            start_result = subprocess.run(f"openstack server start {proxy1_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if start_result.returncode == 0:
+                print(f"{get_formatted_time()}: Proxy server {proxy1_server_name} started successfully.")
+            else:
+                print(f"{get_formatted_time()}: Failed to start proxy server {proxy1_server_name}. Error: {start_result.stderr}")
+
+        if not is_server_running(proxy2_server_name):
+            start_result = subprocess.run(f"openstack server start {proxy2_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if start_result.returncode == 0:
+                print(f"{get_formatted_time()}: Proxy server {proxy2_server_name} started successfully.")
+            else:
+                print(f"{get_formatted_time()}: Failed to start proxy server {proxy2_server_name}. Error: {start_result.stderr}")
+
         
         #To fetch ipaddresses           
         command_show_server1 = f"openstack server show {tag}_proxy1 -c addresses"
