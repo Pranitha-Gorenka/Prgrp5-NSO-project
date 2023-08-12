@@ -118,42 +118,43 @@ def cleanup(openrc_file, ssh_key):
         print(f"{get_formatted_time()}: All servers with {tag}_ prefix deleted successfully")
 
     # Check remaining subnets
-    remaining_subnets_output = subprocess.check_output("openstack subnet list", shell=True)
-    remaining_subnets = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_subnets_output.decode())
+    remaining_subnets = subprocess.run("openstack subnet list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_network-subnet" in remaining_subnets:
-        print(f"{get_formatted_time()}: Some subnets with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}: subnet with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack router remove subnet {router_name} {subnet_id}")
+        run_command(f"openstack subnet delete {subnet_id}")
     else:
         print(f"{get_formatted_time()}: All subnets with {tag}_ prefix deleted successfully")
 
     # Check remaining networks
-    remaining_networks_output = subprocess.check_output("openstack network list", shell=True)
-    remaining_networks = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_networks_output.decode())
+    remaining_networks = subprocess.run("openstack network list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_network" in remaining_networks:
-        print(f"{get_formatted_time()}: Some networks with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}: networks with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack network delete {tag}_network")
     else:
         print(f"{get_formatted_time()}: All networks with {tag}_ prefix deleted successfully")
 
     # Check remaining routers
-    remaining_routers_output = subprocess.check_output("openstack router list", shell=True)
-    remaining_routers = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_routers_output.decode())
+    remaining_routers = subprocess.run("openstack router list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_network-router" in  remaining_routers:
-        print(f"{get_formatted_time()}: Some routers with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}:routers with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack router delete {tag}_network-router")
     else:
         print(f"{get_formatted_time()}: All routers with {tag}_ prefix deleted successfully")
 
     # Check remaining keypairs
-    remaining_keypairs_output = subprocess.check_output("openstack keypair list", shell=True)
-    remaining_keypairs = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_keypairs_output.decode())
+    remaining_keypairs = subprocess.run("openstack keypair list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_key" in  remaining_keypairs:
-        print(f"{get_formatted_time()}: Some keypairs with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}:keypairs with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack keypair delete {tag}_key")
     else:
         print(f"{get_formatted_time()}: All keypairs with {tag}_ prefix deleted successfully")
 
     # Check remaining security groups
-    remaining_security_groups_output = subprocess.check_output("openstack security group list", shell=True)
-    remaining_security_groups = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_security_groups_output.decode())
+    remaining_security_groups = subprocess.run("openstack security group list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_security-group" in remaining_security_groups:
-        print(f"{get_formatted_time()}: Some security groups with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}:security groups with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack security group delete {tag}_security-group")
     else:
         print(f"{get_formatted_time()}: All security groups with {tag}_ prefix deleted successfully")
 
