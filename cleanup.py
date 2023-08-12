@@ -118,11 +118,13 @@ def cleanup(openrc_file, ssh_key):
         print(f"{get_formatted_time()}: All servers with {tag}_ prefix deleted successfully")
 
     # Check remaining subnets
+    router_name = f"{tag}_network-router"  
+    subnet_id = f"{tag}_network-subnet"
     remaining_subnets = subprocess.run("openstack subnet list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_network-subnet" in remaining_subnets:
         print(f"{get_formatted_time()}: subnet with {tag}_ prefix still remain,deleting")
-        run_command(f"openstack router remove subnet {router_name} {subnet_id}")
-        run_command(f"openstack subnet delete {subnet_id}")
+        run_command(f"openstack router remove subnet {tag}_network-router} {tag}_network-subnet")
+        run_command(f"openstack subnet delete {tag}_network-subnet")
     else:
         print(f"{get_formatted_time()}: All subnets with {tag}_ prefix deleted successfully")
 
