@@ -188,7 +188,7 @@ for server_name in server_names:
 print(f"{get_formatted_time()}: Checking if servers are running...")
 
 # Check if all servers are running
-all_servers_running = all(is_server_running(server) for server in existing_nodes)
+all_servers_running = all(is_server_running(server) for server in server_names)
 
 if all_servers_running:
     print(f"{get_formatted_time()}: All servers are running.")
