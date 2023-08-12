@@ -71,31 +71,6 @@ while True:
     existing_nodes = re.findall(rf"^{tag}_node\d+", result.stdout, re.MULTILINE)
     print(f"{get_formatted_time()}: Checking solution, we have: {len(existing_nodes)} nodes.Sleeping..")
     time.sleep(30)
-    
-    print(f"{get_formatted_time()}: Checking if servers are running...")
-
-    # Check if all servers are running
-    all_servers_running = all(is_server_running(server) for server in existing_nodes)
-
-    if all_servers_running:
-        print(f"{get_formatted_time()}: All servers are running.")
-    else:
-        non_running_servers = [server for server in existing_nodes if not is_server_running(server)]
-        print(f"{get_formatted_time()}: The following servers are not running: {', '.join(non_running_servers)}")
-
-        # Attempt to start non-running servers
-        for server in non_running_servers:
-            print(f"{get_formatted_time()}: Attempting to start server {server}...")
-            start_command = f"openstack server start {server}"
-            start_result = subprocess.run(start_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            
-            if start_result.returncode == 0:
-                print(f"{get_formatted_time()}: Server {server} started successfully.")
-            else:
-                print(f"{get_formatted_time()}: Failed to start server {server}. Error: {start_result.stderr}")
-
-        print(f"{get_formatted_time()}: Waiting for 30 seconds...")
-        time.sleep(30)
         
     if len(existing_nodes) == num_nodes:
         # Update the number of nodes in server.conf
@@ -142,7 +117,32 @@ while True:
                     time.sleep(10)
                 else:
                     print(f"{get_formatted_time()}:{server_name} not created...")
-            
+
+        print(f"{get_formatted_time()}: Checking if servers are running...")
+
+        # Check if all servers are running
+        all_servers_running = all(is_server_running(server) for server in existing_nodes)
+
+        if all_servers_running:
+            print(f"{get_formatted_time()}: All servers are running.")
+        else:
+            non_running_servers = [server for server in existing_nodes if not is_server_running(server)]
+            print(f"{get_formatted_time()}: The following servers are not running: {', '.join(non_running_servers)}")
+
+            # Attempt to start non-running servers
+            for server in non_running_servers:
+                print(f"{get_formatted_time()}: Attempting to start server {server}...")
+                start_command = f"openstack server start {server}"
+                start_result = subprocess.run(start_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+             
+                if start_result.returncode == 0:
+                    print(f"{get_formatted_time()}: Server {server} started successfully.")
+                else:
+                    print(f"{get_formatted_time()}: Failed to start server {server}. Error: {start_result.stderr}")
+ 
+            print(f"{get_formatted_time()}: Waiting for 30 seconds...")
+            time.sleep(30)
+        
         #To fetch ipaddresses           
         command_show_server1 = f"openstack server show {tag}_proxy1 -c addresses"
         output_server1 = subprocess.check_output(command_show_server1, shell=True).decode().strip().split('\n')
