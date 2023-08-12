@@ -37,5 +37,6 @@ Cleanup program cleans up resources created by the operate and install  programs
 
 **Before running the programs, please ensure that you have installed the Python libraries mentioned above in the install script and have the rc file and SSH key in the current folder.**
   
-sudo apt install python3-openstackclient
-pip install python-dotenv
+         sudo apt install python3-openstackclient
+
+         pip install python-dotenv
