@@ -47,11 +47,15 @@ def cleanup(openrc_file, ssh_key):
         print(f"{get_formatted_time()}: deleting {tag}_viprt.. ")
     else:
         print(f"{get_formatted_time()}: {tag}_viprt does not exists! or already deleted.. ")
-   
+        
+    # List subnets and extract subnet IDs
+    subnet_list_output = subprocess.check_output("openstack subnet list", shell=True)
+    subnet_ids = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", subnet_list_output.decode())
+    
     # Remove subnets from router and delete them
     router_name = f"{tag}_network-router"  
     subnet_id = f"{tag}_network-subnet"
-    if subnet_id in subnet:
+    if subnet_id in subnet_ids:
         run_command(f"openstack router remove subnet {router_name} {subnet_id}")
         run_command(f"openstack subnet delete {subnet_id}")
         print(f"{get_formatted_time()}: deleting subnet.. ")
