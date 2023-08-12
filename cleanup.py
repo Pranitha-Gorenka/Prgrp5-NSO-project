@@ -65,7 +65,7 @@ def cleanup(openrc_file, ssh_key):
     if execution3.returncode == 0:
         print(f"{get_formatted_time()}: deleting network.. ")
     else:
-            print(f"{get_formatted_time()}: {tag}_network does not exists! or already deleted.. ")
+        print(f"{get_formatted_time()}: {tag}_network does not exists! or already deleted.. ")
     
     # Delete router
     execution4 = subprocess.run(f"openstack router delete {tag}_network-router", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -110,20 +110,18 @@ def cleanup(openrc_file, ssh_key):
     print(f"{get_formatted_time()}: Checking for {tag} in project..")
     
     # Check remaining servers
-    remaining_servers_output = subprocess.check_output("openstack server list", shell=True)
-    remaining_servers = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_servers_output.decode())
+    remaining_servers = subprocess.run("openstack server list", shell=True, capture_output=True, text=True).stdout
     if any(f"{tag}_" in server for server in remaining_servers):
-        print(f"{get_formatted_time()}: Some servers with {tag}_ prefix still remain")
+        print(f"{get_formatted_time()}: Some servers with {tag}_ prefix still remain,deleting")
+        run_command(f"openstack server delete {remaining_servers}")
     else:
         print(f"{get_formatted_time()}: All servers with {tag}_ prefix deleted successfully")
 
     # Check remaining subnets
-    router_name = f"{tag}_network-router"  
-    subnet_id = f"{tag}_network-subnet"
     remaining_subnets = subprocess.run("openstack subnet list", shell=True, capture_output=True, text=True).stdout
     if f"{tag}_network-subnet" in remaining_subnets:
         print(f"{get_formatted_time()}: subnet with {tag}_ prefix still remain,deleting")
-        run_command(f"openstack router remove subnet {tag}_network-router} {tag}_network-subnet")
+        run_command(f"openstack router remove subnet {tag}_network-router {tag}_network-subnet")
         run_command(f"openstack subnet delete {tag}_network-subnet")
     else:
         print(f"{get_formatted_time()}: All subnets with {tag}_ prefix deleted successfully")
