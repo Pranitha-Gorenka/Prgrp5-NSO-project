@@ -112,37 +112,59 @@ def cleanup(openrc_file, ssh_key):
     # Check remaining servers
     remaining_servers_output = subprocess.check_output("openstack server list", shell=True)
     remaining_servers = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_servers_output.decode())
-    print(f"{get_formatted_time()}: All servers deleted successfully")
+    if any(f"{tag}_" in server for server in remaining_servers):
+        print(f"{get_formatted_time()}: Some servers with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All servers with {tag}_ prefix deleted successfully")
 
-   # Check remaining subnets
+    # Check remaining subnets
     remaining_subnets_output = subprocess.check_output("openstack subnet list", shell=True)
     remaining_subnets = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_subnets_output.decode())
-    print(f"{get_formatted_time()}: All subnets deleted successfully")
+    if any(f"{tag}_" in subnet for subnet in remaining_subnets):
+        print(f"{get_formatted_time()}: Some subnets with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All subnets with {tag}_ prefix deleted successfully")
 
     # Check remaining networks
     remaining_networks_output = subprocess.check_output("openstack network list", shell=True)
     remaining_networks = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_networks_output.decode())
-    print(f"{get_formatted_time()}: All networks deleted successfully")
+    if any(f"{tag}_" in network for network in remaining_networks):
+        print(f"{get_formatted_time()}: Some networks with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All networks with {tag}_ prefix deleted successfully")
 
     # Check remaining routers
     remaining_routers_output = subprocess.check_output("openstack router list", shell=True)
     remaining_routers = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_routers_output.decode())
-    print(f"{get_formatted_time()}: All routers deleted successfully")
+    if any(f"{tag}_" in router for router in remaining_routers):
+        print(f"{get_formatted_time()}: Some routers with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All routers with {tag}_ prefix deleted successfully")
 
     # Check remaining keypairs
     remaining_keypairs_output = subprocess.check_output("openstack keypair list", shell=True)
     remaining_keypairs = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_keypairs_output.decode())
-    print(f"{get_formatted_time()}: All keypairs deleted successfully")
+    if any(f"{tag}_" in keypair for keypair in remaining_keypairs):
+        print(f"{get_formatted_time()}: Some keypairs with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All keypairs with {tag}_ prefix deleted successfully")
 
     # Check remaining security groups
     remaining_security_groups_output = subprocess.check_output("openstack security group list", shell=True)
     remaining_security_groups = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_security_groups_output.decode())
-    print(f"{get_formatted_time()}: All security groups deleted successfully")
+    if any(f"{tag}_" in security_group for security_group in remaining_security_groups):
+        print(f"{get_formatted_time()}: Some security groups with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All security groups with {tag}_ prefix deleted successfully")
 
     # Check remaining volumes
     remaining_volumes_output = subprocess.check_output("openstack volume list", shell=True)
     remaining_volumes = re.findall(r"\|\s+(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})\s+\|", remaining_volumes_output.decode())
-    print(f"{get_formatted_time()}: All volumes deleted successfully")
+    if any(f"{tag}_" in volume for volume in remaining_volumes):
+        print(f"{get_formatted_time()}: Some volumes with {tag}_ prefix still remain")
+    else:
+        print(f"{get_formatted_time()}: All volumes with {tag}_ prefix deleted successfully")
+
 
     print(f"{get_formatted_time()}:cleaning done")    
     
