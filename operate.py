@@ -124,7 +124,7 @@ while True:
         all_servers_running = all(is_server_running(server) for server in existing_nodes)
 
         if all_servers_running:
-            print(f"{get_formatted_time()}: All servers are running.")
+            print(f"{get_formatted_time()}: All node servers are running.")
         else:
             non_running_servers = [server for server in existing_nodes if not is_server_running(server)]
             print(f"{get_formatted_time()}: {', '.join(non_running_servers)} are not running")
@@ -152,7 +152,7 @@ while True:
             start_result = subprocess.run(f"openstack server start {bastion_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if start_result.returncode == 0:
                 print(f"{get_formatted_time()}: {bastion_server_name} are not running")
-                print(f"{get_formatted_time()}: Bastion server {bastion_server_name} started successfully.")
+                print(f"{get_formatted_time()}:{bastion_server_name} server started successfully.")
             else:
                 print(f"{get_formatted_time()}: Failed to start bastion server {bastion_server_name}. Error: {start_result.stderr}")
 
@@ -160,7 +160,7 @@ while True:
             start_result = subprocess.run(f"openstack server start {proxy1_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if start_result.returncode == 0:
                 print(f"{get_formatted_time()}: {proxy1_server_name} are not running")
-                print(f"{get_formatted_time()}: Proxy server {proxy1_server_name} started successfully.")
+                print(f"{get_formatted_time()}: {proxy1_server_name} server started successfully.")
             else:
                 print(f"{get_formatted_time()}: Failed to start proxy server {proxy1_server_name}. Error: {start_result.stderr}")
 
@@ -168,7 +168,7 @@ while True:
             start_result = subprocess.run(f"openstack server start {proxy2_server_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if start_result.returncode == 0:
                 print(f"{get_formatted_time()}: {proxy2_server_name} are not running")
-                print(f"{get_formatted_time()}: Proxy server {proxy2_server_name} started successfully.")
+                print(f"{get_formatted_time()}: {proxy2_server_name} server started successfully.")
             else:
                 print(f"{get_formatted_time()}: Failed to start proxy server {proxy2_server_name}. Error: {start_result.stderr}")
 
